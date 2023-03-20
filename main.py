@@ -2,6 +2,7 @@ from time import sleep, strftime
 from random import randint
 import pandas as pd
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -9,7 +10,10 @@ from email.mime.multipart import MIMEMultipart
 chromedriver_path = '/Users/connor/PycharmProjects/FlightWebScraper/venv/lib/python3.11/site-packages/selenium' \
                     '/webdriver/chrome/webdriver.py' # Change this to your own chromedriver path!
 
-driver = webdriver.Chrome(executable_path=chromedriver_path)
+driver_service = Service(executable_path=chromedriver_path)
+driver = webdriver.Chrome(service=driver_service)
+
+#driver = webdriver.Chrome(executable_path=chromedriver_path)
 sleep(2)
 
 kayak = 'https://www.kayak.com/flights/LAX-HNL/2023-03-27/2023-04-02?sort=bestflight_a'
