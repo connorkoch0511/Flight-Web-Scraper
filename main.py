@@ -3,14 +3,15 @@ from random import randint
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 import smtplib
 from email.mime.multipart import MIMEMultipart
 
-chromedriver_path = '/Users/connor/PycharmProjects/FlightWebScraper/venv/lib/python3.11/site-packages/selenium' \
-                    '/webdriver/chrome/webdriver.py' # Change this to your own chromedriver path!
+#chromedriver_path = '/Users/connor/PycharmProjects/FlightWebScraper/venv/lib/python3.11/site-packages/selenium' \
+                    #'/webdriver/chrome/webdriver.py' # Change this to your own chromedriver path!
 
-driver_service = Service(executable_path=chromedriver_path)
+driver_service = Service(executable_path=ChromeDriverManager().install())
 driver = webdriver.Chrome(service=driver_service)
 
 #driver = webdriver.Chrome(executable_path=chromedriver_path)
@@ -23,7 +24,7 @@ sleep(3)
 # Closing the popup
 
 # xp_popup_close = '//button[contains(@id,"dialog-close") and contains(@class,"Button-No-Standard-Style close ")]'
-# driver.find_elements_by_xpath(xp_popup_close)[5].click()
+# driver.find_elements(By.XPATH, xp_popup_close)[5].click()
 
 # Load more results to maximize the scraping
 
@@ -50,7 +51,7 @@ def start_kayak(city_from, city_to, date_start, date_end):
     # sometimes a popup shows up, so we can use a try statement to check it and close
     try:
         xp_popup_close = '//button[contains(@id,"dialog-close") and contains(@class,"Button-No-Standard-Style close ")]'
-        driver.find_elements_by_xpath(xp_popup_close)[5].click()
+        driver.find_elements(By.XPATH, xp_popup_close)[5].click()
     except Exception as e:
         pass
     sleep(randint(60, 95))
@@ -61,10 +62,12 @@ def start_kayak(city_from, city_to, date_start, date_end):
     print('starting first scrape.....')
     df_flights_best = page_scrape()
     df_flights_best['sort'] = 'best'
+    print("before")
     sleep(randint(60, 80))
+    print("after")
 
     # Let's also get the lowest prices from the matrix on top
-    matrix = driver.find_elements_by_xpath('//*[contains(@id,"FlexMatrixCell")]')
+    matrix = driver.find_elements(By.XPATH, '//*[contains(@id,"FlexMatrixCell")]')
     matrix_prices = [price.text.replace('$', '') for price in matrix]
     matrix_prices = list(map(int, matrix_prices))
     matrix_min = min(matrix_prices)
@@ -72,7 +75,7 @@ def start_kayak(city_from, city_to, date_start, date_end):
 
     print('switching to cheapest results.....')
     cheap_results = '//a[@data-code = "price"]'
-    driver.find_element_by_xpath(cheap_results).click()
+    driver.find_element('xpath', cheap_results).click()
     sleep(randint(60, 90))
     print('loading more.....')
 
@@ -136,8 +139,9 @@ def start_kayak(city_from, city_to, date_start, date_end):
 def page_scrape():
     """This function takes care of the scraping part"""
 
+    print("in page scrape func")
     xp_sections = '//*[@class="section duration"]'
-    sections = driver.find_elements_by_xpath(xp_sections)
+    sections = driver.find_elements(By.XPATH, xp_sections)
     sections_list = [value.text for value in sections]
     section_a_list = sections_list[::2]  # This is to separate the two flights
     section_b_list = sections_list[1::2]  # This is to separate the two flights
@@ -148,6 +152,7 @@ def page_scrape():
     # you can add a sleep here, to let you solve the captcha and continue scraping
     # i'm using a SystemExit because i want to test everything from the start
     if section_a_list == []:
+        print("empty")
         raise SystemExit
 
     # I'll use the letter A for the outbound flight and B for the inbound
@@ -165,7 +170,7 @@ def page_scrape():
         b_duration.append(''.join(n.split()[0:2]))
 
     xp_dates = '//div[@class="section date"]'
-    dates = driver.find_elements_by_xpath(xp_dates)
+    dates = driver.find_elements(By.XPATH, xp_dates)
     dates_list = [value.text for value in dates]
     a_date_list = dates_list[::2]
     b_date_list = dates_list[1::2]
@@ -176,27 +181,28 @@ def page_scrape():
     b_weekday = [value.split()[1] for value in b_date_list]
 
     # getting the prices
+    print("getting prices")
     xp_prices = '//a[@class="booking-link"]/span[@class="price option-text"]'
-    prices = driver.find_elements_by_xpath(xp_prices)
+    prices = driver.find_elements(By.XPATH, xp_prices)
     prices_list = [price.text.replace('$', '') for price in prices if price.text != '']
     prices_list = list(map(int, prices_list))
 
     # the stops are a big list with one leg on the even index and second leg on odd index
     xp_stops = '//div[@class="section stops"]/div[1]'
-    stops = driver.find_elements_by_xpath(xp_stops)
+    stops = driver.find_elements(By.XPATH, xp_stops)
     stops_list = [stop.text[0].replace('n', '0') for stop in stops]
     a_stop_list = stops_list[::2]
     b_stop_list = stops_list[1::2]
 
     xp_stops_cities = '//div[@class="section stops"]/div[2]'
-    stops_cities = driver.find_elements_by_xpath(xp_stops_cities)
+    stops_cities = driver.find_elements(By.XPATH, xp_stops_cities)
     stops_cities_list = [stop.text for stop in stops_cities]
     a_stop_name_list = stops_cities_list[::2]
     b_stop_name_list = stops_cities_list[1::2]
 
     # this part gets me the airline company and the departure and arrival times, for both legs
     xp_schedule = '//div[@class="section times"]'
-    schedules = driver.find_elements_by_xpath(xp_schedule)
+    schedules = driver.find_elements(By.XPATH, xp_schedule)
     hours_list = []
     carrier_list = []
     for schedule in schedules:
@@ -233,6 +239,7 @@ def page_scrape():
                                'Price': prices_list})[cols]
 
     flights_df['timestamp'] = strftime("%Y%m%d-%H%M")  # so we can know when it was scraped
+    print("end of page scrape func")
     return flights_df
 
 
@@ -241,10 +248,10 @@ city_to = input('Where to? ')
 date_start = input('Search around which departure date? Please use YYYY-MM-DD format only ')
 date_end = input('Return when? Please use YYYY-MM-DD format only ')
 
-# city_from = 'LIS'
-# city_to = 'SIN'
-# date_start = '2019-08-21'
-# date_end = '2019-09-07'
+# city_from = 'LAX'
+# city_to = 'HNL'
+# date_start = '2023-03-27'
+# date_end = '2023-04-02'
 
 for n in range(0, 5):
     start_kayak(city_from, city_to, date_start, date_end)
