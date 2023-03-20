@@ -6,7 +6,8 @@ from selenium.webdriver.common.keys import Keys
 import smtplib
 from email.mime.multipart import MIMEMultipart
 
-chromedriver_path = 'C:/{YOUR PATH HERE}/chromedriver_win32/chromedriver.exe' # Change this to your own chromedriver path!
+chromedriver_path = '/Users/connor/PycharmProjects/FlightWebScraper/venv/lib/python3.11/site-packages/selenium' \
+                    '/webdriver/chrome/webdriver.py' # Change this to your own chromedriver path!
 
 driver = webdriver.Chrome(executable_path=chromedriver_path)
 sleep(2)
@@ -111,8 +112,8 @@ def start_kayak(city_from, city_to, date_start, date_end):
     if loading == weird:
         loading = 'Not sure'
 
-    username = 'YOUREMAIL@hotmail.com'
-    password = 'YOUR PASSWORD'
+    username = 'connorrkoch@outlook.com'
+    password = 'SixersFan#1!'
 
     server = smtplib.SMTP('smtp.outlook.com', 587)
     server.ehlo()
@@ -122,9 +123,9 @@ def start_kayak(city_from, city_to, date_start, date_end):
     Cheapest Flight: {}\nAverage Price: {}\n\nRecommendation: {}\n\nEnd of message'.format(matrix_min, matrix_avg, (
                 loading + '\n' + prediction)))
     message = MIMEMultipart()
-    message['From'] = 'YOUREMAIL@hotmail.com'
-    message['to'] = 'YOUROTHEREMAIL@domain.com'
-    server.sendmail('YOUREMAIL@hotmail.com', 'YOUROTHEREMAIL@domain.com', msg)
+    message['From'] = 'connorrkoch@outlook.com'
+    message['to'] = 'connor.koch@yahoo.com'
+    server.sendmail('connorrkoch@outlook.com', 'connor.koch@yahoo.com', msg)
     print('sent email.....')
 
 
