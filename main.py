@@ -63,9 +63,7 @@ def start_kayak(city_from, city_to, date_start, date_end):
     print('starting first scrape.....')
     df_flights_best = page_scrape()
     df_flights_best['sort'] = 'best'
-    print("before")
     sleep(randint(60, 80))
-    print("after")
 
     # Let's also get the lowest prices from the matrix on top
     matrix = driver.find_elements(By.XPATH, '//div[contains(@class,"jvgZ")]')
@@ -76,14 +74,12 @@ def start_kayak(city_from, city_to, date_start, date_end):
     for thousand in matrix_prices:
         matrix_prices[counter] = thousand.replace(",", "")
         counter += 1
-    print(matrix_prices)
     matrix_prices = list(map(int, matrix_prices))
     matrix_min = min(matrix_prices)
     matrix_avg = sum(matrix_prices) / len(matrix_prices)
 
     print('switching to cheapest results.....')
     cheap_results = '//div[@aria-label = "Cheapest"]'
-    print(driver.find_elements(By.XPATH, cheap_results))
     driver.find_elements(By.XPATH, cheap_results)[0].click()
     sleep(randint(60, 90))
     print('loading more.....')
@@ -97,7 +93,6 @@ def start_kayak(city_from, city_to, date_start, date_end):
 
     print('switching to quickest results.....')
     quick_results = '//div[@aria-label = "Quickest"]'
-    print(driver.find_elements(By.XPATH, quick_results))
     driver.find_elements(By.XPATH, quick_results)[0].click()
     sleep(randint(60, 90))
     print('loading more.....')
@@ -179,24 +174,25 @@ def page_scrape():
         b_section_names.append(''.join(n.split()[2:5]))
         b_duration.append(''.join(n.split()[0:2]))
 
-    #xp_dates = '//div[@class="VOuO-container"]'
-    #dates = driver.find_elements(By.XPATH, xp_dates)
-    #dates_list = [value.text for value in dates]
-    #a_date_list = dates_list[::2]
-    #b_date_list = dates_list[1::2]
+    xp_dates = '//div[@class="c9L-i"]'
+    dates = driver.find_elements(By.XPATH, xp_dates)
+    dates_list = [value.text for value in dates]
+    a_date_list = dates_list[::2]
+    b_date_list = dates_list[1::2]
     # Separating the weekday from the day
-    #a_day = [value.split()[0] for value in a_date_list]
-    #a_weekday = [value.split()[1] for value in a_date_list]
-    #b_day = [value.split()[0] for value in b_date_list]
-    #b_weekday = [value.split()[1] for value in b_date_list]
-    #print("a_day")
-    #print(len(a_day))
-    #print("a_weekday")
-    #print(len(a_weekday))
-    #print("b_day")
-    #print(len(b_day))
-    #print("b_weekday")
-    #print(len(b_weekday))
+    a_day = [value.split()[0] for value in a_date_list]
+    a_weekday = [value.split()[1] for value in a_date_list]
+    b_day = [value.split()[0] for value in b_date_list]
+    b_weekday = [value.split()[1] for value in b_date_list]
+    print("a_day")
+    print(len(a_day))
+    print("a_weekday")
+    print(len(a_weekday))
+    print("b_day")
+    print(len(b_day))
+    print("b_weekday")
+    print(len(b_weekday))
+    #sleep(3600)
 
     # getting the prices
     print("getting prices")
@@ -238,12 +234,16 @@ def page_scrape():
     b_carrier = carrier_list[1::2]
 
     cols = (
-    ['Out Time','Out Airline', 'Out Cities', 'Out Duration', 'Out Stops', 'Out Stop Cities',
-     'Return Time', 'Return Airline', 'Return Cities', 'Return Duration', 'Return Stops',
-     'Return Stop Cities', 'Price'])
+    ['Out Day', 'Out Time', 'Out Weekday', 'Out Airline', 'Out Cities', 'Out Duration', 'Out Stops', 'Out Stop Cities',
+     'Return Day', 'Return Time', 'Return Weekday', 'Return Airline', 'Return Cities', 'Return Duration', 'Return Stops'
+     , 'Return Stop Cities', 'Price'])
 
-    flights_df = pd.DataFrame({'Out Duration': a_duration,
+    flights_df = pd.DataFrame({'Out Day': a_day,
+                               'Out Weekday': a_weekday,
+                               'Out Duration': a_duration,
                                'Out Cities': a_section_names,
+                               'Return Day': b_day,
+                               'Return Weekday': b_weekday,
                                'Return Duration': b_duration,
                                'Return Cities': b_section_names,
                                'Out Stops': a_stop_list,
