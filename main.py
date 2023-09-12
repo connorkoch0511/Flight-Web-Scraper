@@ -113,9 +113,9 @@ def start_kayak(city_from, city_to, date_start, date_end):
 
     # We can keep track of what they predict and how it actually turns out!
     xp_loading = '//div[contains(@id,"advice")]'
-    loading = str(driver.find_elements(By.XPATH, xp_loading))
+    loading = driver.find_elements(By.XPATH, xp_loading)[0].text
     xp_prediction = '//span[@class="info-text"]'
-    prediction = str(driver.find_elements(By.XPATH, xp_prediction))
+    prediction = driver.find_elements(By.XPATH, xp_prediction)[0].text
     print(loading + '\n' + prediction)
 
     # sometimes we get this string in the loading variable, which will conflict with the email we send later
@@ -125,7 +125,7 @@ def start_kayak(city_from, city_to, date_start, date_end):
         loading = 'Not sure'
 
     username = 'connorrkoch@outlook.com'
-    password = 'SixersFan#1!'
+    password = 'xxx' #change to your password and change email above
 
     server = smtplib.SMTP('smtp.outlook.com', 587)
     server.ehlo()
@@ -135,6 +135,7 @@ def start_kayak(city_from, city_to, date_start, date_end):
     Cheapest Flight: {}\nAverage Price: {}\n\nRecommendation: {}\n\nEnd of message'.format(matrix_min, matrix_avg, (
                 loading + '\n' + prediction)))
     message = MIMEMultipart()
+    #change emails to yours
     message['From'] = 'connorrkoch@outlook.com'
     message['to'] = 'connor.koch@yahoo.com'
     server.sendmail('connorrkoch@outlook.com', 'connor.koch@yahoo.com', msg)
@@ -174,6 +175,7 @@ def page_scrape():
         b_section_names.append(''.join(n.split()[2:5]))
         b_duration.append(''.join(n.split()[0:2]))
 
+    # getting departure and return dates
     xp_dates = '//div[@class="c9L-i"]'
     dates = driver.find_elements(By.XPATH, xp_dates)
     dates_list = [value.text for value in dates]
@@ -184,15 +186,6 @@ def page_scrape():
     a_weekday = [value.split()[1] for value in a_date_list]
     b_day = [value.split()[0] for value in b_date_list]
     b_weekday = [value.split()[1] for value in b_date_list]
-    print("a_day")
-    print(len(a_day))
-    print("a_weekday")
-    print(len(a_weekday))
-    print("b_day")
-    print(len(b_day))
-    print("b_weekday")
-    print(len(b_weekday))
-    #sleep(3600)
 
     # getting the prices
     print("getting prices")
